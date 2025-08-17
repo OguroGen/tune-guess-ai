@@ -2,15 +2,14 @@
 
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
-import type { QuizData, ApiResponse } from '../types/quiz';
 
 const HitSongQuizApp = () => {
-  const [year, setYear] = useState<string>('1980');
-  const [quizData, setQuizData] = useState<QuizData | null>(null);
-  const [currentHintIndex, setCurrentHintIndex] = useState<number>(-1);
-  const [showAnswer, setShowAnswer] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
+  const [year, setYear] = useState('1980');
+  const [quizData, setQuizData] = useState(null);
+  const [currentHintIndex, setCurrentHintIndex] = useState(-1);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const fetchQuizData = async () => {
     if (!year || Number(year) < 1950 || Number(year) > 2024) {
@@ -38,7 +37,7 @@ const HitSongQuizApp = () => {
         throw new Error(errorData.error || `API error: ${response.status}`);
       }
 
-      const data: ApiResponse = await response.json();
+      const data = await response.json();
       console.log('受信したデータ:', data);
       
       setQuizData({
@@ -46,7 +45,7 @@ const HitSongQuizApp = () => {
         hints: Array.isArray(data.hints) ? data.hints : [data.hints],
         answer: data.answer
       });
-    } catch (err: unknown) {
+    } catch (err) {
       console.error('API error:', err);
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       setError(`エラー: ${errorMessage}`);
@@ -199,7 +198,7 @@ const HitSongQuizApp = () => {
                       <h3 className="text-xl font-bold text-gray-800">ヒント</h3>
                     </div>
                     <div className="space-y-3">
-                      {quizData.hints.slice(0, currentHintIndex + 1).map((hint: string, index: number) => (
+                      {quizData.hints.slice(0, currentHintIndex + 1).map((hint, index) => (
                         <div key={index} className="flex items-start gap-3 animate-fadeIn">
                           <div className="w-7 h-7 bg-gradient-to-r from-yellow-400 to-orange-400 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 mt-0.5">
                             {index + 1}
