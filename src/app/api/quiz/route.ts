@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: any = await request.json();
     const { year } = body;
 
     if (!year) {
@@ -40,13 +42,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data = await response.json();
+    const data: any = await response.json();
     console.log('=== Dify生レスポンス全体 ===');
     console.log(JSON.stringify(data, null, 2));
     console.log('=== データ構造解析 ===');
 
     // Difyからの応答形式を確認し、適切にパース
-    let result;
+    let result: any;
+    
     if (data.data && data.data.outputs) {
       result = data.data.outputs;
     } else if (data.outputs) {
@@ -61,13 +64,16 @@ export async function POST(request: NextRequest) {
     console.log('result のキー:', Object.keys(result));
 
     // ヒントの処理
-    let hints = result.hints || result.hint || [];
-    if (typeof hints === 'string') {
+    let hints: string[] = [];
+    const rawHints = result.hints || result.hint || [];
+    if (typeof rawHints === 'string') {
       // 文字列の場合、適切に分割
-      hints = hints
+      hints = rawHints
         .split(/\n/)
         .map((hint: string) => hint.replace(/^[①②③]\s*/, '').trim())
         .filter((hint: string) => hint.length > 0);
+    } else if (Array.isArray(rawHints)) {
+      hints = rawHints;
     }
 
     const responseData = {
@@ -79,10 +85,11 @@ export async function POST(request: NextRequest) {
     console.log('送信するデータ:', responseData);
     return NextResponse.json(responseData);
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('API呼び出しエラー:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: `サーバーエラー: ${error.message}` },
+      { error: `サーバーエラー: ${errorMessage}` },
       { status: 500 }
     );
   }

@@ -2,14 +2,15 @@
 
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
+import type { QuizData, ApiResponse } from '../types/quiz';
 
 const HitSongQuizApp = () => {
-  const [year, setYear] = useState('1980');
-  const [quizData, setQuizData] = useState<any>(null);
-  const [currentHintIndex, setCurrentHintIndex] = useState(-1);
-  const [showAnswer, setShowAnswer] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [year, setYear] = useState<string>('1980');
+  const [quizData, setQuizData] = useState<QuizData | null>(null);
+  const [currentHintIndex, setCurrentHintIndex] = useState<number>(-1);
+  const [showAnswer, setShowAnswer] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
   const fetchQuizData = async () => {
     if (!year || Number(year) < 1950 || Number(year) > 2024) {
@@ -37,7 +38,7 @@ const HitSongQuizApp = () => {
         throw new Error(errorData.error || `API error: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data: ApiResponse = await response.json();
       console.log('受信したデータ:', data);
       
       setQuizData({
@@ -45,9 +46,10 @@ const HitSongQuizApp = () => {
         hints: Array.isArray(data.hints) ? data.hints : [data.hints],
         answer: data.answer
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('API error:', err);
-      setError(`エラー: ${err.message}`);
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      setError(`エラー: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -147,6 +149,7 @@ const HitSongQuizApp = () => {
             <div className="relative h-full">
               {quizData.problem && (
                 <div className="h-full">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={quizData.problem}
                     alt="ヒット曲クイズの画像"
